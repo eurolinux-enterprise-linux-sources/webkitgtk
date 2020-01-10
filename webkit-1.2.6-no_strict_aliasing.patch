@@ -1,0 +1,12 @@
+diff -up webkit-1.2.6/GNUmakefile.in.no_strict_aliasing webkit-1.2.6/GNUmakefile.in
+--- webkit-1.2.6/GNUmakefile.in.no_strict_aliasing	2013-07-24 14:25:28.033520257 +0200
++++ webkit-1.2.6/GNUmakefile.in	2013-07-24 14:25:53.257519188 +0200
+@@ -8994,7 +8994,7 @@ libJavaScriptCore_la_CXXFLAGS = \
+ 	$(libJavaScriptCore_la_CFLAGS)
+ 
+ libJavaScriptCore_la_CFLAGS = \
+-	-fstrict-aliasing \
++	-fno-strict-aliasing \
+ 	-O3 \
+ 	$(global_cflags) \
+ 	$(GLIB_CFLAGS) \
