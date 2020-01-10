@@ -35,17 +35,24 @@
 
 Name:		webkitgtk
 Version:	1.4.3
-Release:	8%{?dist}
+Release:	9%{?dist}
 Summary:	GTK+ Web content engine library
 
 Provides:	WebKit-gtk = %{version}-%{release}
 Obsoletes:	WebKit-gtk < %{version}-%{release}
+# Add provide for compat symlink (with 1.2.x)
+# https://bugzilla.redhat.com/show_bug.cgi?id=1152849
+%if %{?__isa_bits} == 64
+Provides:	libwebkit-1.0.so.2()(%{?__isa_bits}bit)
+%else
+Provides:	libwebkit-1.0.so.2
+%endif
 
 Group:		Development/Libraries
 License:	LGPLv2+ and BSD
 URL:		http://www.webkitgtk.org/
 
-Source0:	http://www.webkitgtk.org/webkit-%{version}.tar.gz
+Source0:	http://www.webkitgtk.org/releases/webkit-%{version}.tar.gz
 
 ## See: https://bugzilla.redhat.com/show_bug.cgi?id=516057
 ## FIXME: We forcibly disable the JIT compiler for the time being.
@@ -102,6 +109,14 @@ Requires:	pkgconfig
 Requires:	gtk2-devel
 Provides:	WebKit-gtk-devel = %{version}-%{release}
 Obsoletes:	WebKit-gtk-devel < %{version}-%{release}
+
+# Add provide for compat symlink (with 1.2.x)
+# https://bugzilla.redhat.com/show_bug.cgi?id=1152849
+%if %{?__isa_bits} == 64
+Provides:	libwebkit-1.0.so()(%{?__isa_bits}bit)
+%else
+Provides:	libwebkit-1.0.so
+%endif
 
 %description	devel
 The %{name}-devel package contains libraries, build data, and header
@@ -236,6 +251,11 @@ cp -P %{_libdir}/libwebkitgtk-1.0.so %{_libdir}/libwebkit-1.0.so
 %{_docdir}/%{name}-%{version}/
 
 %changelog
+* Mon Nov 10 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-9
+- Add Provides for compat symlinks
+- Fix upstream source url
+- Resolves: rhbz#1152849
+
 * Tue Sep 09 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-8
 - Fix more of the wrongly aligned memory commits on ppc64
 - Fix crash in Yarr JIT
