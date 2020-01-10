@@ -1,3 +1,469 @@
+2010-06-21  Philippe Normand  <pnormand@igalia.com>
+
+        Reviewed by Xan Lopez.
+
+        [PNG decoder] direct access to jmpbuf is deprecated in libpng >= 1.4.0beta103
+        https://bugs.webkit.org/show_bug.cgi?id=40907
+
+        Define a JMPBUF macro to cope with deprecation of the jmpbuf
+        attribute in libpng >= 1.4.
+
+        * platform/image-decoders/png/PNGImageDecoder.cpp:
+        (WebCore::decodingFailed):
+        (WebCore::PNGImageReader::decode):
+        (WebCore::PNGImageDecoder::headerAvailable):
+        (WebCore::PNGImageDecoder::rowAvailable):
+
+2010-11-30  Huzaifa Sidhpurwala <huzaifas@redhat.com>
+
+        Backport crash fix for
+        https://bugs.webkit.org/show_bug.cgi?id=45611
+
+        Prevent block logical height of a root inline box from overflowing by clamping it
+        at INT_MAX. Otherwise, we will not be able to properly dirty the set of lines during
+        removal a floating object.
+
+        Test: fast/overflow/overflow-block-logical-height-crash.html
+	
+        * rendering/RootInlineBox.cpp:
+        (WebCore::RootInlineBox::alignBoxesInBlockDirection):
+
+2010-08-25  Cris Neckar  <cdn@chromium.org>
+
+        Reviewed by Darin Adler.
+
+        Added abort condition for RenderCounters when traversing a detached render tree.
+        https://bugs.webkit.org/show_bug.cgi?id=43812
+
+        Test: fast/css/counters/counter-traverse-object-crash.html
+
+        * rendering/RenderCounter.cpp:
+        (WebCore::findPlaceForCounter):
+
+2010-08-23  Abhishek Arya  <inferno@chromium.org>
+
+        Reviewed by Dimitri Glazkov.
+
+        Fix security origin calculation in createPattern. Need to use
+        cachedImage->response().url() instead of cachedImage->url().
+        https://bugs.webkit.org/show_bug.cgi?id=44399.
+
+        Test: http/tests/security/canvas-remote-read-remote-image-redirect.html
+
+        * html/canvas/CanvasRenderingContext2D.cpp:
+        (WebCore::CanvasRenderingContext2D::createPattern):
+
+2010-08-20  Tony Chang  <tony@chromium.org>
+
+        Reviewed by Adam Barth.
+
+        crash when trying to access a stale Node pointer in FocusController::setFocusedNode
+        https://bugs.webkit.org/show_bug.cgi?id=44226
+
+        Test: fast/events/focus-change-crash2.html
+
+        * page/FocusController.cpp:
+        (WebCore::FocusController::setFocusedNode): add a ref to prevent the focused node from being deleted
+
+2010-08-12  Justin Schuh  <jschuh@chromium.org>
+
+        Reviewed by Dumitru Daniliuc.
+
+        Clear PluginData's page pointer on page refresh
+        https://bugs.webkit.org/show_bug.cgi?id=43888
+
+        Test: plugins/access-after-page-destroyed.html
+
+        * page/Page.cpp:
+        (WebCore::Page::refreshPlugins):
+
+2010-07-28  Justin Schuh  <jschuh@chromium.org>
+
+        Reviewed by Nate Chapin.
+
+        Clear PluginData's page pointer on Page destruction
+        https://bugs.webkit.org/show_bug.cgi?id=43147
+
+        Test: plugins/access-after-page-destroyed.html
+
+        * page/Page.cpp:
+        (WebCore::Page::~Page):
+
+2010-08-17  Steve Block  <steveblock@google.com>
+
+        Reviewed by Jeremy Orlow.
+
+        Geolocation clearWatch() needs to protect against invalid IDs
+        https://bugs.webkit.org/show_bug.cgi?id=44096
+
+        If the ID passed to clearWatch() is invalid, we early-out.
+
+        Test: fast/dom/Geolocation/clear-watch-invalid-id-crash.html
+
+        * page/Geolocation.cpp:
+        (WebCore::Geolocation::Watchers::set):
+        (WebCore::Geolocation::Watchers::remove):
+        (WebCore::Geolocation::watchPosition):
+        (WebCore::Geolocation::clearWatch):
+
+2010-07-20  Abhishek Arya  <inferno@chromium.org>
+
+        Reviewed by David Hyatt.
+
+        Check the node is a text node before doing the static cast
+        for editing commands.
+        https://bugs.webkit.org/show_bug.cgi?id=42655
+
+        Test: editing/execCommand/editing-nontext-node-crash.xhtml
+
+        * editing/DeleteSelectionCommand.cpp:
+        (WebCore::DeleteSelectionCommand::fixupWhitespace):
+        * editing/InsertLineBreakCommand.cpp:
+        (WebCore::InsertLineBreakCommand::doApply):
+        * editing/InsertParagraphSeparatorCommand.cpp:
+        (WebCore::InsertParagraphSeparatorCommand::doApply):
+
+2010-07-26  Justin Schuh  <jschuh@chromium.org>
+
+        Reviewed by Darin Fisher.
+
+        Check history state against origin before setting
+        https://bugs.webkit.org/show_bug.cgi?id=42858
+
+        Tests: fast/loader/stateobjects/replacestate-base-illegal.html
+               fast/loader/stateobjects/replacestate-base-legal.html
+
+        * page/History.cpp:
+        (WebCore::History::urlForState):
+        (WebCore::History::stateObjectAdded):
+
+2010-07-12  Tony Chang  <tony@chromium.org>
+
+        Reviewed by David Hyatt.
+
+        crash in FrameView::detachCustomScrollbars
+        https://bugs.webkit.org/show_bug.cgi?id=41196
+
+        Test: scrollbars/hidden-iframe-scrollbar-crash.html
+
+        * page/FrameView.cpp:
+        (WebCore::FrameView::detachCustomScrollbars):
+
+2010-07-02  Ojan Vafai  <ojan@chromium.org>
+
+        Reviewed by Adam Barth.
+
+        Crash in RenderObject::containingBlock when clearing selection in a display:none node.
+        https://bugs.webkit.org/show_bug.cgi?id=41523
+
+        updateStyleIfNeeded before clearing the selection in the RenderView. Otherwise,
+        m_selectionStart and m_selectionEnd in RenderView point to garbage object.
+        This fixes the crash because updateStyleIfNeeded clears the selection before
+        clobbering nodes that contain the selection.
+
+        Test: editing/selection/crash-on-clear-selection.html
+
+        * editing/SelectionController.cpp:
+        (WebCore::SelectionController::updateAppearance):
+
+2010-06-23  Abhishek Arya  <inferno@chromium.org>
+
+        Reviewed by Kenneth Rohde Christiansen.
+
+        Firing the onchange event on select which changes its size > 1 causes the select
+        object to change from a menulist to a listbox. However, when propogating the events,
+        we do a bad cast assuming the object will remain a menulist. Added proper checks to
+        make sure we check the renderer after the onchange is fired and propogate the event
+        based on correct object type.
+        https://bugs.webkit.org/show_bug.cgi?id=40828 
+
+        Test: fast/events/select-onchange-crash.html
+
+        * dom/SelectElement.cpp:
+        (WebCore::SelectElement::setSelectedIndex):
+
+2010-07-21  Justin Schuh  <jschuh@chromium.org>
+
+        Reviewed by Oliver Hunt.
+
+        Prevent DeleteButtonController enable state from changing when not editing
+        https://bugs.webkit.org/show_bug.cgi?id=42659
+
+        Test: svg/custom/use-invalid-html.xhtml
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::cloneChildNodes):
+
+2010-06-10  Tony Chang  <tony@chromium.org>
+
+        Reviewed by Kent Tamura.
+
+        crash when focus is changed while trying to focus next element
+        https://bugs.webkit.org/show_bug.cgi?id=40407
+
+        Test: fast/events/focus-change-crash.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::focus):
+
+2010-08-10  Abhishek Arya  <inferno@chromium.org>
+
+        Reviewed by David Hyatt.
+
+        Take checks for ruby base existence out of the ASSERTs.
+        https://bugs.webkit.org/show_bug.cgi?id=43795
+
+        Test: fast/ruby/ruby-remove-no-base.html
+
+        * rendering/RenderRubyRun.cpp:
+        (WebCore::RenderRubyRun::addChild):
+        (WebCore::RenderRubyRun::removeChild):
+
+2010-07-26  Justin Schuh  <jschuh@chromium.org>
+
+        Reviewed by Darin Fisher.
+
+        Check history state against origin before setting
+        https://bugs.webkit.org/show_bug.cgi?id=42858
+
+        Tests: fast/loader/stateobjects/replacestate-base-illegal.html
+               fast/loader/stateobjects/replacestate-base-legal.html
+
+        * page/History.cpp:
+        (WebCore::History::urlForState):
+        (WebCore::History::stateObjectAdded):
+
+2010-07-20  Abhishek Arya  <inferno@chromium.org>
+
+        Reviewed by David Hyatt.
+
+        Check the node is a text node before doing the static cast
+        for editing commands.
+        https://bugs.webkit.org/show_bug.cgi?id=42655
+
+        Test: editing/execCommand/editing-nontext-node-crash.xhtml
+
+        * editing/DeleteSelectionCommand.cpp:
+        (WebCore::DeleteSelectionCommand::fixupWhitespace):
+        * editing/InsertLineBreakCommand.cpp:
+        (WebCore::InsertLineBreakCommand::doApply):
+        * editing/InsertParagraphSeparatorCommand.cpp:
+        (WebCore::InsertParagraphSeparatorCommand::doApply):
+
+2010-07-21  Justin Schuh  <jschuh@chromium.org>
+
+        Reviewed by Oliver Hunt.
+
+        Prevent DeleteButtonController enable state from changing when not editing
+        https://bugs.webkit.org/show_bug.cgi?id=42659
+
+        Test: svg/custom/use-invalid-html.xhtml
+
+        * dom/ContainerNode.cpp:
+        (WebCore::ContainerNode::cloneChildNodes):
+
+2010-07-06  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Dirk Schulze.
+
+        <use> on <font-face> causes crashes, if SVGUseElement gets detached
+        https://bugs.webkit.org/show_bug.cgi?id=41621
+
+        Do not call removeFromMappedElementSheet() from the SVGFontFaceElement destructor,
+        as that can potentially cause the element to be reattached while destructing.
+
+        In order to fix the crash in the testcase, the order of calling the base-class detach
+        method in SVGUseElement and the instance/shadow tree destruction has to be reversed,
+        matching the order in removedFromDocument().
+
+        Test: svg/custom/use-font-face-crash.svg
+
+        * svg/SVGFontFaceElement.cpp:
+        (WebCore::SVGFontFaceElement::~SVGFontFaceElement): Remove removeFromMappedElementSheet() call.
+        * svg/SVGUseElement.cpp:
+        (WebCore::SVGUseElement::detach): Reverse order of calling base-class detach method and instance/shadow tree destruction.
+
+2010-07-05  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Darin Adler.
+
+        Memory corruption with SVG <use> element
+        https://bugs.webkit.org/show_bug.cgi?id=40994
+
+        Fix race condition in svgAttributeChanged. Never call svgAttributeChanged() from attributeChanged()
+        when we're synchronizing SVG attributes. It leads to either unnecessary extra work being done or
+        crashes. Especially together with <polyline>/<polygon> which always synchronize the SVGAnimatedPoints
+        datastructure with the points attribute, no matter if there are changes are not. This should be
+        furhter optimized, but this fix is sane and fixes the root of the evil races.
+
+        Test: svg/custom/use-property-synchronization-crash.svg
+
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::attributeChanged):
+
+2010-07-01  Justin Schuh  <jschuh@chromium.org>
+
+        Reviewed by Dan Bernstein.
+
+        Prevent crash on counter destruction
+        https://bugs.webkit.org/show_bug.cgi?id=40032
+
+        Added counter destruction to RenderWidget::destroy()
+
+        Test: fast/css/counters/destroy-counter-crash.html
+
+        * rendering/RenderWidget.cpp:
+        (WebCore::RenderWidget::destroy):
+
+2010-06-29  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Darin Adler.
+
+        <rdar://problem/7975842> Certain text is repeated after using splitText()
+
+        Tests: fast/text/setData-dirty-lines.html
+               fast/text/splitText-dirty-lines.html
+
+        * dom/CharacterData.cpp:
+        (WebCore::CharacterData::setData): Call RenderText::setTextWithOffset() rather than
+        setText(), because only the former correctly dirties line boxes.
+        * dom/Text.cpp:
+        (WebCore::Text::splitText): Ditto.
+
+2010-06-25  Dan Bernstein  <mitz@apple.com>
+
+        Reviewed by Sam Weinig.
+
+        <rdar://problem/8000667> Certain text is repeated before and after a line break
+
+        Test: fast/text/bidi-explicit-embedding-past-end.html
+
+        * platform/text/BidiResolver.h:
+        (WebCore::::createBidiRunsForLine): Committing explicit embedding past the end of the range
+        creates BidiRuns up to the end of the range, so at that point, we can stop iterating.
+
+2010-06-23  Nikolas Zimmermann  <nzimmermann@rim.com>
+
+        Reviewed by Eric Seidel.
+
+        Reproducible crash in com.apple.WebCore 0x01ed3784 WebCore::RenderLineBoxList::appendLineBox(WebCore::InlineFlowBox*) + 36
+        https://bugs.webkit.org/show_bug.cgi?id=40953
+
+        REGRESSION (r58209-58231): Memory corruption with invalid SVG
+        https://bugs.webkit.org/show_bug.cgi?id=40173
+
+        Fix several crashes, all related to <foreignObject> and/or invalid SVG documents.
+        - Only allow <svg> nodes, as direct children of a <foreignObject>, not any other "partial" SVG content.
+        - Assure to create RenderSVGRoot objects for <svg> nodes in <foreignObject>, treat them as "outermost SVG elements".
+        - Never allow any partial SVG content to appear in any document. Only <svg> elements are allowed.
+
+        Tests: svg/custom/bug45331.svg
+               svg/foreignObject/disallowed-svg-nodes-as-direct-children.svg
+               svg/foreignObject/no-crash-with-svg-content-in-html-document.svg
+               svg/foreignObject/svg-document-as-direct-child.svg
+               svg/foreignObject/svg-document-in-html-document.svg
+               svg/foreignObject/text-tref-02-b.svg
+
+        * dom/Element.cpp: Added childShouldCreateRenderer, with ENABLE(SVG) guards.
+        (WebCore::Element::childShouldCreateRenderer): Only create a renderer for a SVG child, if we're a SVG element, or if the child is a <svg> element.
+        * dom/Element.h: Added childShouldCreateRenderer, with ENABLE(SVG) guards.
+        * svg/SVGForeignObjectElement.cpp:
+        (WebCore::SVGForeignObjectElement::childShouldCreateRenderer): Disallow arbitary SVG content, only <svg> elements are allowed as direct children of a <foreignObject>
+        * svg/SVGSVGElement.cpp:
+        (WebCore::SVGSVGElement::isOutermostSVG): Be sure to create RenderSVGRoot objects for <svg> elements inside <foreignObject>
+
+2010-06-10  Abhishek Arya  <inferno@chromium.org>
+
+        Reviewed by Dave Hyatt.
+
+        Do not render CSS Styles :first-letter and :first-line in a SVG text element context. 
+        https://bugs.webkit.org/show_bug.cgi?id=40031
+
+        Test: svg/text/text-style-invalid.svg
+
+        * rendering/RenderSVGText.cpp:
+        (WebCore::RenderSVGText::firstLineBlock):
+        (WebCore::RenderSVGText::updateFirstLetter):
+        * rendering/RenderSVGText.h:
+
+2010-06-11  Abhishek Arya  <inferno@chromium.org>
+
+        Reviewed by David Hyatt.
+
+        Don't process floats if parent node is not a RenderBlock.
+        https://bugs.webkit.org/show_bug.cgi?id=40033
+
+        Test: svg/text/clear-floats-crash.svg
+
+        * rendering/RenderBlock.cpp:
+        (WebCore::RenderBlock::clearFloats):
+
+2010-06-15  Xan Lopez  <xlopez@igalia.com>
+
+        Reviewed by Gustavo Noronha.
+
+        [GTK] Does not compile with -DGSEAL_ENABLE
+        https://bugs.webkit.org/show_bug.cgi?id=37851
+
+        Fix compilation with GSEAL_ENABLE.
+
+        * platform/gtk/GtkVersioning.h:
+        * platform/gtk/PlatformScreenGtk.cpp:
+        (WebCore::screenDepth):
+        (WebCore::screenDepthPerComponent):
+        * platform/gtk/PopupMenuGtk.cpp:
+        (WebCore::PopupMenu::show):
+        * platform/gtk/ScrollbarGtk.cpp:
+        (ScrollbarGtk::detachAdjustment):
+        (ScrollbarGtk::updateThumbPosition):
+        (ScrollbarGtk::updateThumbProportion):
+        * plugins/gtk/PluginViewGtk.cpp:
+        (WebCore::PluginView::paint):
+        (WebCore::PluginView::initXEvent):
+        (WebCore::PluginView::platformGetValue):
+        (WebCore::PluginView::platformStart):
+        * plugins/gtk/gtk2xtbin.c:
+        (gtk_xtbin_realize):
+        (gtk_xtbin_new):
+        (gtk_xtbin_set_position):
+        (gtk_xtbin_unrealize):
+
+2010-06-07  Martin Robinson  <mrobinson@igalia.com>
+
+        Reviewed by Xan Lopez.
+
+        [GTK] gtk_widget_get_window should replace widget->window
+        https://bugs.webkit.org/show_bug.cgi?id=40180
+
+        Replace all uses of widget->window with gtk_widget_get_window. For older
+        GTK+ versions, #define gtk_widget_get_window in GtkVersioning.h.
+
+        No tests necessary as functionality has not changed.
+
+        * platform/gtk/GtkPluginWidget.cpp:
+        (WebCore::GtkPluginWidget::invalidateRect): Replace widget->window use.
+        * platform/gtk/GtkVersioning.h: Add gtk_widget_get_window for old GTK+ versions.
+        * platform/gtk/PlatformScreenGtk.cpp: 
+        (WebCore::getVisual): Replace widget->window use.
+        (WebCore::screenRect): Ditto.
+        * platform/gtk/PopupMenuGtk.cpp:
+        (WebCore::PopupMenu::show): Ditto.
+        * platform/gtk/WidgetGtk.cpp:
+        (WebCore::gdkDrawable): Ditto.
+        (WebCore::Widget::setCursor): Ditto.
+
+2010-06-10  Tony Chang  <tony@chromium.org>
+
+        Reviewed by Kent Tamura.
+
+        crash when focus is changed while trying to focus next element
+        https://bugs.webkit.org/show_bug.cgi?id=40407
+
+        Test: fast/events/focus-change-crash.html
+
+        * dom/Element.cpp:
+        (WebCore::Element::focus):
+
 2010-05-14  Abhishek Arya  <inferno@chromium.org>
 
         Reviewed by David Hyatt.

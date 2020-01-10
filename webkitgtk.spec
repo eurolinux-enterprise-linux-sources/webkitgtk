@@ -34,8 +34,8 @@
 %bcond_with 	wml
 
 Name:		webkitgtk
-Version:	1.2.3
-Release:	1%{?dist}
+Version:	1.2.6
+Release:	2%{?dist}
 Summary:	GTK+ Web content engine library
 
 Provides:	WebKit-gtk = %{version}-%{release}
@@ -58,6 +58,7 @@ Source0:	http://www.webkitgtk.org/webkit-%{version}.tar.gz
 #Patch1: 	webkit-1.1.13-no-execmem.patch
 Patch2: 	webkit-1.2.0-nspluginwrapper.patch
 Patch3: 	webkit-s390.patch
+Patch4: 	webkit-js-crash.patch
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -125,6 +126,7 @@ LICENSE, README, and AUTHORS files.
 %ifarch s390 s390x
 %patch3 -p1 -b .s390
 %endif
+%patch4 -p1 -b .js-crash
 
 %build
 CFLAGS="%optflags -DLIBSOUP_I_HAVE_READ_BUG_594377_AND_KNOW_SOUP_PASSWORD_MANAGER_MIGHT_GO_AWAY" %configure							\
@@ -200,6 +202,12 @@ rm -rf %{buildroot}
 %{_docdir}/%{name}-%{version}/
 
 %changelog
+* Thu Jan 20 2011 Martin Stransky <stransky@redhat.com> - 1.2.6-2
+- Added fix for js regression
+
+* Mon Jan 10 2011 Martin Stransky <stransky@redhat.com> - 1.2.6-1
+- Update to 1.2.6
+
 * Tue Jul 27 2010 Martin Stransky <stransky@redhat.com> - 1.2.3-1
 - Update to 1.2.3
 

@@ -1,4 +1,58 @@
 ================
+WebKitGTK+ 1.2.6
+================
+
+What's new in WebKitGTK+ 1.2.6?
+
+  - New stable release, API and ABI compatible with previous 1.2.x
+    versions;
+  - Fixes crashes with newer libpng (>= 1.4)
+  - The patches to fix the following CVEs are included with help from
+    Huzaifa Sidhpurwala <huzaifas@redhat.com> from the Red Hat
+    security team:
+
+      CVE-2010-4198 CVE-2010-4197 CVE-2010-4204 CVE-2010-4206
+      CVE-2010-1791 CVE-2010-3812 CVE-2010-3813
+
+================
+WebKitGTK+ 1.2.5
+================
+
+What's new in WebKitGTK+ 1.2.5?
+
+  - New stable release, API and ABI compatible with previous 1.2.x
+    versions;
+  - The patches to fix the following CVEs are included with help from
+    Vincent Danen and other members of the Red Hat security team:
+
+      CVE-2010-1780 CVE-2010-3113 CVE-2010-1814 CVE-2010-1812
+      CVE-2010-1815 CVE-2010-3115 CVE-2010-1807 CVE-2010-3114
+      CVE-2010-3116 CVE-2010-3257 CVE-2010-3259
+
+  Update: CVE-2010-3255  was also addressed in this release, but failed
+  to be listed at release time.
+
+================
+WebKitGTK+ 1.2.4
+================
+
+What's new in WebKitGTK+ 1.2.4?
+
+  - New stable release, API and ABI compatible with previous 1.2.x
+    versions;
+  - The patches to fix the following CVEs are included with help from
+    Vincent Danen and other members of the Red Hat security team:
+
+      CVE-2010-1781 CVE-2010-1782 CVE-2010-1784 CVE-2010-1785
+      CVE-2010-1786 CVE-2010-1787 CVE-2010-1788 CVE-2010-1790
+      CVE-2010-1792 CVE-2010-1793 CVE-2010-2648
+
+  Update: The following were also addressed in this release, but failed
+  to be listed at release time.
+
+    CVE-2010-2647 CVE-2010-3119
+
+================
 WebKitGTK+ 1.2.3
 ================
 
@@ -17,6 +71,9 @@ What's new in WebKitGTK+ 1.2.3?
       CVE-2010-1664 CVE-2010-1758 CVE-2010-1759 CVE-2010-1760
       CVE-2010-1761 CVE-2010-1762 CVE-2010-1770 CVE-2010-1771
       CVE-2010-1772 CVE-2010-1773 CVE-2010-1774
+
+   Update: CVE-2010-2264 was also addressed in this release, but
+   failed to be listed at release time.
 
 ================
 WebKitGTK+ 1.2.2
