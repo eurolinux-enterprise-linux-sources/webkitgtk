@@ -34,8 +34,8 @@
 %bcond_with 	wml
 
 Name:		webkitgtk
-Version:	1.2.6
-Release:	5%{?dist}
+Version:	1.4.3
+Release:	8%{?dist}
 Summary:	GTK+ Web content engine library
 
 Provides:	WebKit-gtk = %{version}-%{release}
@@ -47,19 +47,19 @@ URL:		http://www.webkitgtk.org/
 
 Source0:	http://www.webkitgtk.org/webkit-%{version}.tar.gz
 
-#Patch0: 	webkit-1.1.14-atomic-word.patch
-
 ## See: https://bugzilla.redhat.com/show_bug.cgi?id=516057
 ## FIXME: We forcibly disable the JIT compiler for the time being.
 ## This is a temporary workaround which causes a slight performance hit on
 ## 32- and 64-bit x86; but until we can fix the JIT to correctly handle WX
 ## memory, at least we'll have a WebKit stack that doesn't crash due to this
 ## bug. :)
-#Patch1: 	webkit-1.1.13-no-execmem.patch
-Patch2: 	webkit-1.2.0-nspluginwrapper.patch
-Patch3: 	webkit-s390.patch
-Patch4: 	webkit-js-crash.patch
-Patch5: 	webkit-1.2.6-no_strict_aliasing.patch
+Patch1: 	webkit-1.3.12-no-execmem.patch
+Patch2: 	webkit-1.3.10-nspluginwrapper.patch
+Patch3: 	webkit-1.2.6-no_strict_aliasing.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1136299
+Patch4: 	webkit-1.4.3-commit_align.patch
+# https://bugs.webkit.org/show_bug.cgi?id=59221
+Patch5:		webkit-1.4.3-yarr_zero_position.patch
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -73,7 +73,7 @@ BuildRequires:	gperf
 BuildRequires:	gstreamer-devel
 BuildRequires:	gstreamer-plugins-base-devel
 BuildRequires:	gtk2-devel
-BuildRequires:	libsoup-devel >= 2.27.91
+BuildRequires:	libsoup-devel >= 2.33.6
 BuildRequires:	libicu-devel
 BuildRequires:	libjpeg-devel
 BuildRequires:	libxslt-devel
@@ -121,29 +121,38 @@ LICENSE, README, and AUTHORS files.
 
 %prep
 %setup -qn "webkit-%{version}"
-# %patch0 -p1 -b .atomic-word
-# %patch1 -p1 -b .no-execmem
+%patch1 -p1 -b .no-execmem
 %patch2 -p1 -b .nspluginwrapper
-%ifarch s390 s390x
-%patch3 -p1 -b .s390
+%patch3 -p1 -b .no_strict_aliasing
+%ifarch ppc64
+%patch4 -p1 -b .commit_align
 %endif
-%patch4 -p1 -b .js-crash
-%patch5 -p1 -b .no_strict_aliasing
+%patch5 -p1 -b .yarr_zero_position
 
 %build
+
+%ifarch s390
+# Decrease debuginfo verbosity to reduce memory consumption even more
+%global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
+%endif
+
 CFLAGS="%optflags -DLIBSOUP_I_HAVE_READ_BUG_594377_AND_KNOW_SOUP_PASSWORD_MANAGER_MIGHT_GO_AWAY" %configure							\
 %ifarch s390 s390x ppc ppc64
 			--disable-jit				\
 %else
 			--enable-jit				\
 %endif
-			--enable-geolocation			\
+			--disable-geolocation			\
+			--disable-introspection			\
 %{?with_3dtransforms:	--enable-3D-transforms		}	\
 %{?with_coverage:	--enable-coverage		}	\
 %{?with_debug:		--enable-debug			}	\
 %{?with_pango:		--with-font-backend=pango	}	\
 %{?with_svg:		--enable-svg-filters		}	\
 %{?with_wml:		--enable-wml			}
+
+mkdir -p DerivedSources/webkit
+mkdir -p DerivedSources/WebCore
 
 make %{?_smp_mflags}
 
@@ -156,50 +165,69 @@ make install DESTDIR=%{buildroot}
 chrpath --delete Programs/GtkLauncher
 install -d -m 755 %{buildroot}%{_libexecdir}/%{name}
 install -m 755 Programs/GtkLauncher %{buildroot}%{_libexecdir}/%{name}
-%find_lang webkit
+
+# With webkitgtk-1.4.x upstream introduced the webkitgtk3 package. With that
+# they renamed the library name to make them both coinstallable. So we will
+# create a new symlink with old name.
+cp -P %{buildroot}%{_libdir}/libwebkitgtk-1.0.so.0 %{buildroot}%{_libdir}/libwebkit-1.0.so.2
+cp -P %{buildroot}%{_libdir}/libwebkitgtk-1.0.so %{buildroot}%{_libdir}/libwebkit-1.0.so
+%find_lang webkit-2.0
 
 ## Finally, copy over and rename the various files for %%doc inclusion.
-%add_to_doc_files JavaScriptCore/icu/LICENSE
-%add_to_doc_files WebKit/LICENSE
-%add_to_doc_files WebCore/icu/LICENSE
-%add_to_doc_files WebCore/LICENSE-APPLE
-%add_to_doc_files WebCore/LICENSE-LGPL-2
-%add_to_doc_files WebCore/LICENSE-LGPL-2.1
-
-%add_to_doc_files JavaScriptCore/pcre/COPYING
-%add_to_doc_files JavaScriptCore/COPYING.LIB
-
-%add_to_doc_files JavaScriptCore/icu/README
-%add_to_doc_files WebKit/gtk/po/README
-
-%add_to_doc_files JavaScriptCore/AUTHORS
-%add_to_doc_files JavaScriptCore/pcre/AUTHORS
-
-%add_to_doc_files JavaScriptCore/THANKS
-
-%add_to_doc_files WebKit/gtk/NEWS
-
+%add_to_doc_files Source/WebKit/LICENSE
+%add_to_doc_files Source/WebKit/gtk/po/README
+%add_to_doc_files Source/WebKit/gtk/NEWS
+%add_to_doc_files Source/WebCore/icu/LICENSE
+%add_to_doc_files Source/WebCore/LICENSE-APPLE
+%add_to_doc_files Source/WebCore/LICENSE-LGPL-2
+%add_to_doc_files Source/WebCore/LICENSE-LGPL-2.1
+%add_to_doc_files Source/JavaScriptCore/COPYING.LIB
+%add_to_doc_files Source/JavaScriptCore/THANKS
+%add_to_doc_files Source/JavaScriptCore/AUTHORS
+%add_to_doc_files Source/JavaScriptCore/icu/README
+%add_to_doc_files Source/JavaScriptCore/icu/LICENSE
 
 %clean
 rm -rf %{buildroot}
 
 
-%post	-p /sbin/ldconfig
+%post
+/sbin/ldconfig
+#glib-compile-schemas %{_datadir}/glib-2.0/schemas
 
-%postun	-p /sbin/ldconfig
+%post  devel
+/sbin/ldconfig
+#glib-compile-schemas %{_datadir}/glib-2.0/schemas
 
+%postun
+/sbin/ldconfig
+#glib-compile-schemas %{_datadir}/glib-2.0/schemas
 
-%files -f webkit.lang
+# With webkitgtk-1.4.x upstream introduced the webkitgtk3 package. With that
+# they renamed the library name to make them both coinstallable. So we will
+# create a new symlink with old name.
+%posttrans
+cp -P %{_libdir}/libwebkitgtk-1.0.so.0 %{_libdir}/libwebkit-1.0.so.2
+
+%posttrans devel
+cp -P %{_libdir}/libwebkitgtk-1.0.so %{_libdir}/libwebkit-1.0.so
+
+%files -f webkit-2.0.lang
+%defattr(-,root,root,-)
 %defattr(-,root,root,-)
 %exclude %{_libdir}/*.la
-%{_libdir}/libwebkit-1.0.so.*
+%{_libdir}/libwebkitgtk-1.0.so.*
+%{_libdir}/libwebkit-1.0.so.2
 %{_libexecdir}/%{name}/
+%exclude %{_datadir}/glib-2.0/schemas/org.webkitgtk-1.0.gschema.xml
+%{_datadir}/webkitgtk-1.0
+%{_datadir}/webkit-1.0
 
 %files	devel
 %defattr(-,root,root,-)
-%{_bindir}/jsc
-%{_datadir}/webkit-1.0
+%{_bindir}/jsc-1
 %{_includedir}/webkit-1.0
+%{_libdir}/libwebkitgtk-1.0.so
 %{_libdir}/libwebkit-1.0.so
 %{_libdir}/pkgconfig/webkit-1.0.pc
 
@@ -208,6 +236,42 @@ rm -rf %{buildroot}
 %{_docdir}/%{name}-%{version}/
 
 %changelog
+* Tue Sep 09 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-8
+- Fix more of the wrongly aligned memory commits on ppc64
+- Fix crash in Yarr JIT
+- Resolves: rhbz#1136299
+
+* Wed Sep 03 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-7
+- Fix the wrongly generated patch
+- Resolves: rhbz#1136299
+
+* Wed Sep 03 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-6
+- Apply the previously added patch
+- Resolves: rhbz#1136299
+
+* Tue Sep 02 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-5
+- Fix the new memory commits to be correctly aligned on ppc64
+- Resolves: rhbz#1136299
+
+* Wed Jul 23 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-4
+- Create symlinks in posttrans phase to avoid their removal
+- Resolves: rhbz#1118424
+
+* Thu Jul 17 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-3
+- Compile with --disable-geolocation
+- Resolves: rhbz#1119647
+- Restore symlinks after ldconfig call in post to avoid their removal
+- Resolves: rhbz#1118424
+
+* Thu Jun 19 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-2
+- Create symlinks to the libwebkitgtk library with the old name (libwebkit)
+- Resolves: rhbz#1033151
+
+* Thu Jun 19 2014 Tomas Popela <tpopela@redhat.com> - 1.4.3-1
+- Update to 1.4.3
+- Decrease debuginfo verbosity for s390 reduce memory consumption
+- Resolves: rhbz#1033151
+
 * Wed Jul 24 2013 Tomas Popela <tpopela@redhat.com> - 1.2.6-5
 - Build JSC with -fno-no_strict_aliasing
 - Resolves: rhbz#966571

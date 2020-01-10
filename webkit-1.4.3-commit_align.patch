@@ -1,0 +1,55 @@
+diff -up webkit-1.4.3/Source/JavaScriptCore/interpreter/RegisterFile.h.commit_align webkit-1.4.3/Source/JavaScriptCore/interpreter/RegisterFile.h
+--- webkit-1.4.3/Source/JavaScriptCore/interpreter/RegisterFile.h.commit_align	2014-09-08 16:40:32.540030695 +0200
++++ webkit-1.4.3/Source/JavaScriptCore/interpreter/RegisterFile.h	2014-09-08 16:40:44.420030702 +0200
+@@ -106,8 +106,8 @@ namespace JSC {
+         enum { ProgramCodeThisRegister = -CallFrameHeaderSize - 1 };
+ 
+         static const size_t defaultCapacity = 512 * 1024;
+-        static const size_t defaultMaxGlobals = 8 * 1024;
+-        static const size_t commitSize = 16 * 1024;
++        static const size_t defaultMaxGlobals = 64 * 1024;
++        static const size_t commitSize = 64 * 1024;
+         // Allow 8k of excess registers before we start trying to reap the registerfile
+         static const ptrdiff_t maxExcessCapacity = 8 * 1024;
+ 
+diff -up webkit-1.4.3/Source/JavaScriptCore/runtime/MarkedBlock.h.commit_align webkit-1.4.3/Source/JavaScriptCore/runtime/MarkedBlock.h
+--- webkit-1.4.3/Source/JavaScriptCore/runtime/MarkedBlock.h.commit_align	2014-09-09 08:48:44.350030706 +0200
++++ webkit-1.4.3/Source/JavaScriptCore/runtime/MarkedBlock.h	2014-09-09 08:50:08.140030696 +0200
+@@ -77,7 +77,7 @@ namespace JSC {
+         template <typename Functor> void forEach(Functor&);
+ 
+     private:
+-        static const size_t blockSize = 16 * KB;
++        static const size_t blockSize = 64 * KB;
+         static const size_t blockMask = ~(blockSize - 1); // blockSize must be a power of two.
+ 
+         static const size_t atomMask = ~(atomSize - 1); // atomSize must be a power of two.
+diff -up webkit-1.4.3/Source/JavaScriptCore/wtf/BumpPointerAllocator.h.commit_align webkit-1.4.3/Source/JavaScriptCore/wtf/BumpPointerAllocator.h
+--- webkit-1.4.3/Source/JavaScriptCore/wtf/BumpPointerAllocator.h.commit_align	2014-09-09 10:23:14.750030708 +0200
++++ webkit-1.4.3/Source/JavaScriptCore/wtf/BumpPointerAllocator.h	2014-09-09 10:29:54.260030695 +0200
+@@ -110,7 +110,7 @@ private:
+         if (minimumCapacity < sizeof(BumpPointerPool))
+             return 0;
+ 
+-        size_t poolSize = MINIMUM_BUMP_POOL_SIZE;
++        size_t poolSize = pageSize();
+         while (poolSize < minimumCapacity) {
+             poolSize <<= 1;
+             // The following if check relies on MINIMUM_BUMP_POOL_SIZE being a power of 2!
+diff -up webkit-1.4.3/Source/JavaScriptCore/wtf/PageAllocationAligned.cpp.commit_align webkit-1.4.3/Source/JavaScriptCore/wtf/PageAllocationAligned.cpp
+--- webkit-1.4.3/Source/JavaScriptCore/wtf/PageAllocationAligned.cpp.commit_align	2011-08-06 12:21:13.000000000 +0200
++++ webkit-1.4.3/Source/JavaScriptCore/wtf/PageAllocationAligned.cpp	2014-09-08 09:57:54.900030702 +0200
+@@ -50,7 +50,12 @@ PageAllocationAligned PageAllocationAlig
+     vm_map(current_task(), &address, size, alignmentMask, flags, MEMORY_OBJECT_NULL, 0, FALSE, protection, PROT_READ | PROT_WRITE | PROT_EXEC, VM_INHERIT_DEFAULT);
+     return PageAllocationAligned(reinterpret_cast<void*>(address), size);
+ #else
+-    size_t alignmentDelta = alignment - pageSize();
++    size_t page_size = pageSize();
++    size_t alignmentDelta;
++    if (page_size > alignment)
++        alignmentDelta = page_size - alignment;
++    else
++        alignmentDelta = alignment - page_size;
+ 
+     // Resererve with suffcient additional VM to correctly align.
+     size_t reservationSize = size + alignmentDelta;
